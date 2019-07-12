@@ -69,7 +69,7 @@ ipc::channel::<Serde<Url>>()
 extern crate serde;
 #[cfg(test)] #[macro_use] extern crate serde_derive;
 #[cfg(test)] extern crate serde_json;
-extern crate url;
+extern crate earl;
 
 use serde::{Deserialize, Serialize, Serializer, Deserializer};
 use std::cmp::PartialEq;
@@ -78,7 +78,7 @@ use std::fmt;
 use std::io::Write;
 use std::ops::{Deref, DerefMut};
 use std::str;
-use url::{Url, Host};
+use earl::{Url, Host};
 
 /// Serialises `value` with a given serializer.
 ///

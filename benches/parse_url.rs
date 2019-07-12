@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate bencher;
 
-extern crate url;
+extern crate earl;
 
 use bencher::{black_box, Bencher};
 
-use url::Url;
+use earl::Url;
 
 fn short(bench: &mut Bencher) {
     let url = "https://example.com/bench";

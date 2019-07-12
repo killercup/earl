@@ -17,7 +17,7 @@ for the [Rust](http://rust-lang.org/) programming language.
 First, URL parsing may fail for various reasons and therefore returns a `Result`.
 
 ```
-use url::{Url, ParseError};
+use earl::{Url, ParseError};
 
 assert!(Url::parse("http://[:::1]") == Err(ParseError::InvalidIpv6Address))
 ```
@@ -25,8 +25,8 @@ assert!(Url::parse("http://[:::1]") == Err(ParseError::InvalidIpv6Address))
 Let’s parse a valid URL and look at its components.
 
 ```
-use url::{Url, Host, Position};
-# use url::ParseError;
+use earl::{Url, Host, Position};
+# use earl::ParseError;
 # fn run() -> Result<(), ParseError> {
 let issue_list_url = Url::parse(
     "https://github.com/rust-lang/rust/issues?labels=E-easy&state=open"
@@ -56,8 +56,8 @@ they don’t have a username, password, host, or port,
 and their "path" is an arbitrary string rather than slash-separated segments:
 
 ```
-use url::Url;
-# use url::ParseError;
+use earl::Url;
+# use earl::ParseError;
 
 # fn run() -> Result<(), ParseError> {
 let data_url = Url::parse("data:text/plain,Hello?World#")?;
@@ -85,7 +85,7 @@ Many contexts allow URL *references* that can be relative to a *base URL*:
 Since parsed URLs are absolute, giving a base is required for parsing relative URLs:
 
 ```
-use url::{Url, ParseError};
+use earl::{Url, ParseError};
 
 assert!(Url::parse("../main.css") == Err(ParseError::RelativeUrlWithoutBase))
 ```
@@ -93,8 +93,8 @@ assert!(Url::parse("../main.css") == Err(ParseError::RelativeUrlWithoutBase))
 Use the `join` method on an `Url` to use it as a base URL:
 
 ```
-use url::Url;
-# use url::ParseError;
+use earl::Url;
+# use earl::ParseError;
 
 # fn run() -> Result<(), ParseError> {
 let this_document = Url::parse("http://servo.github.io/rust-url/url/index.html")?;
@@ -233,9 +233,9 @@ impl<'a> ParseOptions<'a> {
     /// ## Example
     /// ```
     /// use std::cell::RefCell;
-    /// use url::{Url, SyntaxViolation};
-    /// # use url::ParseError;
-    /// # fn run() -> Result<(), url::ParseError> {
+    /// use earl::{Url, SyntaxViolation};
+    /// # use earl::ParseError;
+    /// # fn run() -> Result<(), earl::ParseError> {
     /// let violations = RefCell::new(Vec::new());
     /// let url = Url::options()
     ///     .syntax_violation_callback(Some(&|v| violations.borrow_mut().push(v)))
@@ -284,8 +284,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://example.net")?;
@@ -312,8 +312,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse_with_params("https://example.net?dont=clobberme",
@@ -354,8 +354,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let base = Url::parse("https://example.net/a/b.html")?;
@@ -388,8 +388,8 @@ impl Url {
     /// Get default `ParseOptions`, then change base url
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     /// # fn run() -> Result<(), ParseError> {
     /// let options = Url::options();
     /// let api = Url::parse("https://api.example.com")?;
@@ -415,8 +415,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url_str = "https://example.net/";
@@ -438,8 +438,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url_str = "https://example.net/";
@@ -572,8 +572,8 @@ impl Url {
     /// URL with `ftp` scheme:
     ///
     /// ```rust
-    /// use url::{Host, Origin, Url};
-    /// # use url::ParseError;
+    /// use earl::{Host, Origin, Url};
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("ftp://example.com/foo")?;
@@ -589,8 +589,8 @@ impl Url {
     /// URL with `blob` scheme:
     ///
     /// ```rust
-    /// use url::{Host, Origin, Url};
-    /// # use url::ParseError;
+    /// use earl::{Host, Origin, Url};
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("blob:https://example.com/foo")?;
@@ -606,8 +606,8 @@ impl Url {
     /// URL with `file` scheme:
     ///
     /// ```rust
-    /// use url::{Host, Origin, Url};
-    /// # use url::ParseError;
+    /// use earl::{Host, Origin, Url};
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("file:///tmp/foo")?;
@@ -623,8 +623,8 @@ impl Url {
     /// URL with other scheme:
     ///
     /// ```rust
-    /// use url::{Host, Origin, Url};
-    /// # use url::ParseError;
+    /// use earl::{Host, Origin, Url};
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("foo:bar")?;
@@ -643,8 +643,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("file:///tmp/foo")?;
@@ -667,8 +667,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("ftp://rms@example.com")?;
@@ -698,8 +698,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("ftp://rms@example.com")?;
@@ -725,8 +725,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("ftp://rms@example.com")?;
@@ -754,8 +754,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("ftp://rms:secret123@example.com")?;
@@ -789,8 +789,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("ftp://rms@example.com")?;
@@ -822,8 +822,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://127.0.0.1/index.html")?;
@@ -860,8 +860,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://127.0.0.1/index.html")?;
@@ -893,8 +893,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://127.0.0.1/")?;
@@ -921,8 +921,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://example.com")?;
@@ -950,8 +950,8 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("foo://example.com")?;
@@ -982,7 +982,7 @@ impl Url {
     /// For example:
     ///
     /// ```rust
-    /// # use url::Url;
+    /// # use earl::Url;
     /// # use std::net::TcpStream;
     /// # use std::io;
     /// fn connect(url: &Url) -> io::Result<TcpStream> {
@@ -1020,7 +1020,7 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::{Url, ParseError};
+    /// use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://example.com/api/versions?page=2")?;
@@ -1057,7 +1057,7 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
+    /// use earl::Url;
     /// # use std::error::Error;
     ///
     /// # fn run() -> Result<(), Box<Error>> {
@@ -1097,8 +1097,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://example.com/products?page=2")?;
@@ -1138,8 +1138,8 @@ impl Url {
     /// ```rust
     /// use std::borrow::Cow;
     ///
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://example.com/products?page=2&sort=desc")?;
@@ -1176,8 +1176,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let url = Url::parse("https://example.com/data.csv#row=4")?;
@@ -1210,8 +1210,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.com/data.csv")?;
@@ -1267,8 +1267,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.com/products")?;
@@ -1306,7 +1306,7 @@ impl Url {
     /// The return value has a method-chaining API:
     ///
     /// ```rust
-    /// # use url::{Url, ParseError};
+    /// # use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.net?lang=fr#nav")?;
@@ -1365,8 +1365,8 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.com")?;
@@ -1433,7 +1433,7 @@ impl Url {
     /// # Examples
     ///
     /// ```
-    /// use url::Url;
+    /// use earl::Url;
     /// # use std::error::Error;
     ///
     /// # fn run() -> Result<(), Box<Error>> {
@@ -1452,8 +1452,8 @@ impl Url {
     /// Cannot set port for cannot-be-a-base URLs:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("mailto:rms@example.net")?;
@@ -1519,8 +1519,8 @@ impl Url {
     /// Change host:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.net")?;
@@ -1535,8 +1535,8 @@ impl Url {
     /// Remove host:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("foo://example.net")?;
@@ -1551,8 +1551,8 @@ impl Url {
     /// Cannot remove host for 'special' schemes (e.g. `http`):
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.net")?;
@@ -1567,8 +1567,8 @@ impl Url {
     /// Cannot change or remove host for cannot-be-a-base URLs:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("mailto:rms@example.net")?;
@@ -1669,7 +1669,7 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::{Url, ParseError};
+    /// use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("http://example.com")?;
@@ -1684,7 +1684,7 @@ impl Url {
     /// Cannot change URL's from mailto(cannot-be-base) to ip:
     ///
     /// ```rust
-    /// use url::{Url, ParseError};
+    /// use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("mailto:rms@example.com")?;
@@ -1717,7 +1717,7 @@ impl Url {
     /// # Examples
     ///
     /// ```rust
-    /// use url::{Url, ParseError};
+    /// use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("mailto:rmz@example.com")?;
@@ -1791,7 +1791,7 @@ impl Url {
     /// Cannot setup username from mailto(cannot-be-base)
     ///
     /// ```rust
-    /// use url::{Url, ParseError};
+    /// use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("mailto:rmz@example.com")?;
@@ -1806,7 +1806,7 @@ impl Url {
     /// Setup username to user1
     ///
     /// ```rust
-    /// use url::{Url, ParseError};
+    /// use earl::{Url, ParseError};
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("ftp://:secre1@example.com/")?;
@@ -1877,8 +1877,8 @@ impl Url {
     /// Change the URL’s scheme from `https` to `foo`:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.net")?;
@@ -1894,8 +1894,8 @@ impl Url {
     /// Cannot change URL’s scheme from `https` to `foõ`:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("https://example.net")?;
@@ -1910,8 +1910,8 @@ impl Url {
     /// Cannot change URL’s scheme from `mailto` (cannot-be-a-base) to `https`:
     ///
     /// ```
-    /// use url::Url;
-    /// # use url::ParseError;
+    /// use earl::Url;
+    /// # use earl::ParseError;
     ///
     /// # fn run() -> Result<(), ParseError> {
     /// let mut url = Url::parse("mailto:rms@example.net")?;
@@ -1960,7 +1960,7 @@ impl Url {
     ///
     /// ```
     /// # if cfg!(unix) {
-    /// use url::Url;
+    /// use earl::Url;
     ///
     /// # fn run() -> Result<(), ()> {
     /// let url = Url::from_file_path("/tmp/foo.txt")?;
@@ -2083,7 +2083,7 @@ impl Url {
     /// It is the user’s responsibility to check the URL’s scheme before calling this.
     ///
     /// ```
-    /// # use url::Url;
+    /// # use earl::Url;
     /// # let url = Url::parse("file:///etc/passwd").unwrap();
     /// let path = url.to_file_path();
     /// ```
@@ -2454,8 +2454,8 @@ impl<'a> Drop for UrlQuery<'a> {
 /// =======
 ///
 /// ```rust
-/// #[macro_use] extern crate url;
-/// use url::percent_encoding::{utf8_percent_encode, SIMPLE_ENCODE_SET};
+/// #[macro_use] extern crate earl;
+/// use earl::percent_encoding::{utf8_percent_encode, SIMPLE_ENCODE_SET};
 /// define_encode_set! {
 ///     /// This encode set is used in the URL parser for query strings.
 ///     pub QUERY_ENCODE_SET = [SIMPLE_ENCODE_SET] | {' ', '"', '#', '<', '>'}

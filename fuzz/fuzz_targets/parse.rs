@@ -1,6 +1,6 @@
 #![no_main]
 #[macro_use] extern crate libfuzzer_sys;
-extern crate url;
+extern crate earl;
 use std::str;
 
 fuzz_target!(|data: &[u8]| {

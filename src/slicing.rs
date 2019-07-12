@@ -42,7 +42,7 @@ impl Index<Range<Position>> for Url {
 /// A range of positions can be used for slicing `Url`:
 ///
 /// ```rust
-/// # use url::{Url, Position};
+/// # use earl::{Url, Position};
 /// # fn something(some_url: Url) {
 /// let serialization: &str = &some_url[..];
 /// let serialization_without_fragment: &str = &some_url[..Position::AfterQuery];

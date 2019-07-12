@@ -9,14 +9,14 @@
 //! Unit tests
 
 #[macro_use]
-extern crate url;
+extern crate earl;
 
 use std::ascii::AsciiExt;
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::path::{Path, PathBuf};
-use url::{Host, HostAndPort, Url, form_urlencoded};
+use earl::{Host, HostAndPort, Url, form_urlencoded};
 
 #[test]
 fn size() {
@@ -396,7 +396,7 @@ fn test_leading_dots() {
 // inside both a module and a function
 #[test]
 fn define_encode_set_scopes() {
-    use url::percent_encoding::{utf8_percent_encode, SIMPLE_ENCODE_SET};
+    use earl::percent_encoding::{utf8_percent_encode, SIMPLE_ENCODE_SET};
 
     define_encode_set! {
         /// This encode set is used in the URL parser for query strings.
@@ -406,7 +406,7 @@ fn define_encode_set_scopes() {
     assert_eq!(utf8_percent_encode("foo bar", QUERY_ENCODE_SET).collect::<String>(), "foo%20bar");
 
     mod m {
-        use url::percent_encoding::{utf8_percent_encode, SIMPLE_ENCODE_SET};
+        use earl::percent_encoding::{utf8_percent_encode, SIMPLE_ENCODE_SET};
 
         define_encode_set! {
             /// This encode set is used in the URL parser for query strings.
@@ -507,7 +507,7 @@ fn test_old_log_violation_option() {
 
 #[test]
 fn test_syntax_violation_callback() {
-    use url::SyntaxViolation::*;
+    use earl::SyntaxViolation::*;
     let violation = Cell::new(None);
     let url = Url::options()
         .syntax_violation_callback(Some(&|v| violation.set(Some(v))))
@@ -521,7 +521,7 @@ fn test_syntax_violation_callback() {
 
 #[test]
 fn test_syntax_violation_callback_lifetimes() {
-    use url::SyntaxViolation::*;
+    use earl::SyntaxViolation::*;
     let violation = Cell::new(None);
     let vfn = |s| violation.set(Some(s));
 
@@ -540,7 +540,7 @@ fn test_syntax_violation_callback_lifetimes() {
 
 #[test]
 fn test_options_reuse() {
-    use url::SyntaxViolation::*;
+    use earl::SyntaxViolation::*;
     let violations = RefCell::new(Vec::new());
     let vfn = |v| violations.borrow_mut().push(v);
 

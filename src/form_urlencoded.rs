@@ -367,7 +367,7 @@ impl<T: Target> Serializer<T> {
     /// If this serializer was constructed with a string, take and return that string.
     ///
     /// ```rust
-    /// use url::form_urlencoded;
+    /// use earl::form_urlencoded;
     /// let encoded: String = form_urlencoded::Serializer::new(String::new())
     ///     .append_pair("foo", "bar & baz")
     ///     .append_pair("saison", "Été+hiver")

@@ -1,40 +1,23 @@
 [package]
-
-name = "url"
-# When updating version, also modify html_root_url in the lib.rs
-version = "1.7.2"
-authors = ["The rust-url developers"]
+name = "earl"
+version = "0.1.0"
+authors = ["The rust-url developers", "People who like earl grey"]
 
 description = "URL library for Rust, based on the WHATWG URL Standard"
-documentation = "https://docs.rs/url"
-repository = "https://github.com/servo/rust-url"
+documentation = "https://docs.rs/earl"
+repository = "https://github.com/killercup/earl"
 readme = "README.md"
 keywords = ["url", "parser"]
 categories = ["parser-implementations", "web-programming", "encoding"]
 license = "MIT/Apache-2.0"
 
 [badges]
-travis-ci = { repository = "servo/rust-url" }
-appveyor = { repository = "Manishearth/rust-url" }
-
-[workspace]
-members = [".", "idna", "percent_encoding", "url_serde", "data-url"]
-
-[[test]]
-name = "unit"
-
-[[test]]
-name = "data"
-harness = false
-
-[lib]
-test = false
+travis-ci = { repository = "killercup/earl" }
+appveyor = { repository = "killercup/earl" }
 
 [dev-dependencies]
 rustc-test = "0.3"
-rustc-serialize = "0.3"
-serde_json = ">=0.6.1, <0.9"
-
+serde_json = "1"
 bencher = "0.1"
 
 [features]
@@ -44,15 +27,15 @@ heap_size = ["heapsize"]
 [dependencies]
 encoding = {version = "0.2", optional = true}
 heapsize = {version = ">=0.4.1, <0.5", optional = true}
-idna = { version = "0.1.0", path = "./idna" }
+idna = { version = "0.1.0" }
 matches = "0.1"
-percent-encoding = { version = "1.0.0", path = "./percent_encoding" }
 rustc-serialize = {version = "0.3", optional = true}
-serde = {version = ">=0.6.1, <0.9", optional = true}
+percent-encoding = { version = "1.0.0" }
+serde = { version = "1", optional = true}
 
 [[bench]]
 name = "parse_url"
 harness = false
 
 [package.metadata.docs.rs]
-features = ["query_encoding"]
+features = ["query_encoding", "serde"]

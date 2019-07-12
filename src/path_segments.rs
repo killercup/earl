@@ -18,7 +18,7 @@ use Url;
 /// Examples:
 ///
 /// ```rust
-/// use url::Url;
+/// use earl::Url;
 /// # use std::error::Error;
 ///
 /// # fn run() -> Result<(), Box<Error>> {
@@ -68,7 +68,7 @@ impl<'a> PathSegmentsMut<'a> {
     /// Example:
     ///
     /// ```rust
-    /// use url::Url;
+    /// use earl::Url;
     /// # use std::error::Error;
     ///
     /// # fn run() -> Result<(), Box<Error>> {
@@ -96,7 +96,7 @@ impl<'a> PathSegmentsMut<'a> {
     /// Example:
     ///
     /// ```rust
-    /// use url::Url;
+    /// use earl::Url;
     /// # use std::error::Error;
     ///
     /// # fn run() -> Result<(), Box<Error>> {
@@ -161,7 +161,7 @@ impl<'a> PathSegmentsMut<'a> {
     /// Example:
     ///
     /// ```rust
-    /// use url::Url;
+    /// use earl::Url;
     /// # use std::error::Error;
     ///
     /// # fn run() -> Result<(), Box<Error>> {
@@ -181,7 +181,7 @@ impl<'a> PathSegmentsMut<'a> {
     /// a segment is ignored if it is `"."` or `".."`:
     ///
     /// ```rust
-    /// use url::Url;
+    /// use earl::Url;
     /// # use std::error::Error;
     ///
     /// # fn run() -> Result<(), Box<Error>> {
