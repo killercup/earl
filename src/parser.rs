@@ -6,8 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[allow(unused_imports, deprecated)]
-use std::ascii::AsciiExt;
+#[cfg(feature = "heapsize")]
+use heapsize::known_heap_size;
 
 use std::{
     error::Error,
@@ -16,7 +16,7 @@ use std::{
 };
 
 use crate::{
-    encoding::EncodingOverride,
+    encoding_support::EncodingOverride,
     host::{Host, HostInternal},
     Url,
 };

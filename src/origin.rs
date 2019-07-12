@@ -125,4 +125,4 @@ impl Origin {
 pub struct OpaqueOrigin(usize);
 
 #[cfg(feature = "heapsize")]
-known_heap_size!(0, OpaqueOrigin);
+heapsize::known_heap_size!(0, OpaqueOrigin);

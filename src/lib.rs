@@ -114,7 +114,7 @@ pub use idna;
 #[macro_use]
 pub extern crate percent_encoding;
 
-use encoding::EncodingOverride;
+use encoding_support::EncodingOverride;
 #[cfg(feature = "heapsize")]
 use heapsize::HeapSizeOf;
 use host::HostInternal;
@@ -140,7 +140,7 @@ pub use parser::{ParseError, SyntaxViolation};
 pub use path_segments::PathSegmentsMut;
 pub use slicing::Position;
 
-mod encoding;
+mod encoding_support;
 mod host;
 mod origin;
 mod parser;
@@ -191,7 +191,7 @@ impl HeapSizeOf for Url {
 #[derive(Copy, Clone)]
 pub struct ParseOptions<'a> {
     base_url: Option<&'a Url>,
-    encoding_override: encoding::EncodingOverride,
+    encoding_override: crate::encoding_support::EncodingOverride,
     violation_fn: ViolationFn<'a>,
 }
 

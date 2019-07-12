@@ -13,7 +13,7 @@
 //! Converts between a string (such as an URL’s query string)
 //! and a sequence of (name, value) pairs.
 
-use crate::encoding::EncodingOverride;
+use crate::encoding_support::EncodingOverride;
 use percent_encoding::{percent_decode, percent_encode_byte};
 use std::{
     borrow::{Borrow, Cow},
@@ -52,8 +52,6 @@ pub fn parse_with_encoding<'a>(
     encoding_override: Option<::encoding::EncodingRef>,
     use_charset: bool,
 ) -> Result<Parse<'a>, ()> {
-    use std::ascii::AsciiExt;
-
     let mut encoding = EncodingOverride::from_opt_encoding(encoding_override);
     if !(encoding.is_utf8() || input.is_ascii()) {
         return Err(());
