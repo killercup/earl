@@ -13,7 +13,6 @@ extern crate earl;
 
 use earl::{form_urlencoded, Host, HostAndPort, Url};
 use std::{
-    ascii::AsciiExt,
     borrow::Cow,
     cell::{Cell, RefCell},
     net::{Ipv4Addr, Ipv6Addr},

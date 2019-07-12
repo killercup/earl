@@ -109,11 +109,6 @@ assert_eq!(css_url.as_str(), "http://servo.github.io/rust-url/main.css");
 
 #[macro_use]
 extern crate matches;
-#[cfg(feature = "serde")]
-extern crate serde;
-#[cfg(feature = "heapsize")]
-#[macro_use]
-extern crate heapsize;
 
 pub use idna;
 #[macro_use]
@@ -128,8 +123,6 @@ use percent_encoding::{
     percent_decode, percent_encode, utf8_percent_encode, PATH_SEGMENT_ENCODE_SET,
     USERINFO_ENCODE_SET,
 };
-#[cfg(feature = "serde")]
-use std::error::Error;
 use std::{
     borrow::Borrow,
     cmp,
@@ -157,6 +150,9 @@ mod slicing;
 pub mod form_urlencoded;
 #[doc(hidden)]
 pub mod quirks;
+
+#[cfg(feature = "serde")]
+mod serde_support;
 
 /// A parsed URL record.
 #[derive(Clone)]
@@ -2072,91 +2068,6 @@ impl Url {
         Ok(url)
     }
 
-    /// Serialize with Serde using the internal representation of the `Url` struct.
-    ///
-    /// The corresponding `deserialize_internal` method sacrifices some invariant-checking
-    /// for speed, compared to the `Deserialize` trait impl.
-    ///
-    /// This method is only available if the `serde` Cargo feature is enabled.
-    #[cfg(feature = "serde")]
-    #[deny(unused)]
-    pub fn serialize_internal<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-    where
-        S: serde::Serializer,
-    {
-        use serde::Serialize;
-        // Destructuring first lets us ensure that adding or removing fields forces this method
-        // to be updated
-        let Url {
-            ref serialization,
-            ref scheme_end,
-            ref username_end,
-            ref host_start,
-            ref host_end,
-            ref host,
-            ref port,
-            ref path_start,
-            ref query_start,
-            ref fragment_start,
-        } = *self;
-        (
-            serialization,
-            scheme_end,
-            username_end,
-            host_start,
-            host_end,
-            host,
-            port,
-            path_start,
-            query_start,
-            fragment_start,
-        )
-            .serialize(serializer)
-    }
-
-    /// Serialize with Serde using the internal representation of the `Url` struct.
-    ///
-    /// The corresponding `deserialize_internal` method sacrifices some invariant-checking
-    /// for speed, compared to the `Deserialize` trait impl.
-    ///
-    /// This method is only available if the `serde` Cargo feature is enabled.
-    #[cfg(feature = "serde")]
-    #[deny(unused)]
-    pub fn deserialize_internal<D>(deserializer: &mut D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer,
-    {
-        use serde::{Deserialize, Error};
-        let (
-            serialization,
-            scheme_end,
-            username_end,
-            host_start,
-            host_end,
-            host,
-            port,
-            path_start,
-            query_start,
-            fragment_start,
-        ) = Deserialize::deserialize(deserializer)?;
-        let url = Url {
-            serialization: serialization,
-            scheme_end: scheme_end,
-            username_end: username_end,
-            host_start: host_start,
-            host_end: host_end,
-            host: host,
-            port: port,
-            path_start: path_start,
-            query_start: query_start,
-            fragment_start: fragment_start,
-        };
-        if cfg!(debug_assertions) {
-            url.check_invariants().map_err(|ref reason| Error::invalid_value(&reason))?
-        }
-        Ok(url)
-    }
-
     /// Assuming the URL is in the `file` scheme or similar,
     /// convert its path to an absolute `std::path::Path`.
     ///
@@ -2311,34 +2222,6 @@ impl RangeArg for RangeTo<u32> {
     #[inline]
     fn slice_of<'a>(&self, s: &'a str) -> &'a str {
         &s[..self.end as usize]
-    }
-}
-
-/// Serializes this URL into a `serde` stream.
-///
-/// This implementation is only available if the `serde` Cargo feature is enabled.
-#[cfg(feature = "serde")]
-impl serde::Serialize for Url {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(self.as_str())
-    }
-}
-
-/// Deserializes this URL from a `serde` stream.
-///
-/// This implementation is only available if the `serde` Cargo feature is enabled.
-#[cfg(feature = "serde")]
-impl serde::Deserialize for Url {
-    fn deserialize<D>(deserializer: &mut D) -> Result<Url, D::Error>
-    where
-        D: serde::Deserializer,
-    {
-        let string_representation: String = serde::Deserialize::deserialize(deserializer)?;
-        Url::parse(&string_representation)
-            .map_err(|err| serde::Error::invalid_value(err.description()))
     }
 }
 

@@ -20,6 +20,7 @@ appveyor = { repository = "killercup/earl" }
 rustc-test = "0.3"
 serde_json = "1"
 bencher = "0.1"
+serde_derive = "1.0.94"
 
 [features]
 query_encoding = ["encoding"]
