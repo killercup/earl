@@ -13,7 +13,7 @@
 //! Converts between a string (such as an URL’s query string)
 //! and a sequence of (name, value) pairs.
 
-use encoding::EncodingOverride;
+use crate::encoding::EncodingOverride;
 use percent_encoding::{percent_encode_byte, percent_decode};
 use std::borrow::{Borrow, Cow};
 use std::fmt;
@@ -28,9 +28,9 @@ use std::str;
 /// The names and values are percent-decoded. For instance, `%23first=%25try%25` will be
 /// converted to `[("#first", "%try%")]`.
 #[inline]
-pub fn parse(input: &[u8]) -> Parse {
+pub fn parse(input: &[u8]) -> Parse<'_> {
     Parse {
-        input: input,
+        input,
         encoding: EncodingOverride::utf8(),
     }
 }
@@ -76,8 +76,8 @@ pub fn parse_with_encoding<'a>(input: &'a [u8],
         }
     }
     Ok(Parse {
-        input: input,
-        encoding: encoding,
+        input,
+        encoding,
     })
 }
 
@@ -113,7 +113,7 @@ impl<'a> Iterator for Parse<'a> {
     }
 }
 
-fn decode(input: &[u8], encoding: EncodingOverride) -> Cow<str> {
+fn decode(input: &[u8], encoding: EncodingOverride) -> Cow<'_, str> {
     let replaced = replace_plus(input);
     encoding.decode(match percent_decode(&replaced).if_any() {
         Some(vec) => Cow::Owned(vec),
@@ -122,7 +122,7 @@ fn decode(input: &[u8], encoding: EncodingOverride) -> Cow<str> {
 }
 
 /// Replace b'+' with b' '
-fn replace_plus(input: &[u8]) -> Cow<[u8]> {
+fn replace_plus(input: &[u8]) -> Cow<'_, [u8]> {
     match input.iter().position(|&b| b == b'+') {
         None => Cow::Borrowed(input),
         Some(first_position) => {
@@ -163,7 +163,7 @@ impl<'a> Iterator for ParseIntoOwned<'a> {
 /// https://url.spec.whatwg.org/#concept-urlencoded-byte-serializer).
 ///
 /// Return an iterator of `&str` slices.
-pub fn byte_serialize(input: &[u8]) -> ByteSerialize {
+pub fn byte_serialize(input: &[u8]) -> ByteSerialize<'_> {
     ByteSerialize {
         bytes: input,
     }
@@ -176,7 +176,7 @@ pub struct ByteSerialize<'a> {
 }
 
 fn byte_serialized_unchanged(byte: u8) -> bool {
-    matches!(byte, b'*' | b'-' | b'.' | b'0' ... b'9' | b'A' ... b'Z' | b'_' | b'a' ... b'z')
+    matches!(byte, b'*' | b'-' | b'.' | b'0' ..= b'9' | b'A' ..= b'Z' | b'_' | b'a' ..= b'z')
 }
 
 impl<'a> Iterator for ByteSerialize<'a> {
@@ -217,13 +217,13 @@ pub struct Serializer<T: Target> {
     target: Option<T>,
     start_position: usize,
     encoding: EncodingOverride,
-    custom_encoding: Option<SilentDebug<Box<FnMut(&str) -> Cow<[u8]>>>>,
+    custom_encoding: Option<SilentDebug<Box<dyn FnMut(&str) -> Cow<'_, [u8]>>>>,
 }
 
 struct SilentDebug<T>(T);
 
 impl<T> fmt::Debug for SilentDebug<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("…")
     }
 }
@@ -256,18 +256,18 @@ impl<'a> Target for &'a mut String {
 //   `Url::query_pairs_mut` which is `Serializer<UrlQuery>`
 // * `Serializer` keeps its target in a private field
 // * Unlike in other `Target` impls, `UrlQuery::finished` does not return `Self`.
-impl<'a> Target for ::UrlQuery<'a> {
+impl<'a> Target for crate::UrlQuery<'a> {
     fn as_mut_string(&mut self) -> &mut String {
         &mut self.url.as_mut().unwrap().serialization
     }
 
-    fn finish(mut self) -> &'a mut ::Url {
+    fn finish(mut self) -> &'a mut crate::Url {
         let url = self.url.take().unwrap();
         url.restore_already_parsed_fragment(self.fragment.take());
         url
     }
 
-    type Finished = &'a mut ::Url;
+    type Finished = &'a mut crate::Url;
 }
 
 impl<T: Target> Serializer<T> {
@@ -288,7 +288,7 @@ impl<T: Target> Serializer<T> {
         &target.as_mut_string()[start_position..];  // Panic if out of bounds
         Serializer {
             target: Some(target),
-            start_position: start_position,
+            start_position,
             encoding: EncodingOverride::utf8(),
             custom_encoding: None,
         }
@@ -311,7 +311,7 @@ impl<T: Target> Serializer<T> {
 
     /// Set the character encoding to be used for names and values before percent-encoding.
     pub fn custom_encoding_override<F>(&mut self, encode: F) -> &mut Self
-        where F: FnMut(&str) -> Cow<[u8]> + 'static
+        where F: FnMut(&str) -> Cow<'_, [u8]> + 'static
     {
         self.custom_encoding = Some(SilentDebug(Box::new(encode)));
         self
@@ -392,7 +392,7 @@ fn string<T: Target>(target: &mut Option<T>) -> &mut String {
 }
 
 fn append_pair(string: &mut String, start_position: usize, encoding: EncodingOverride,
-               custom_encoding: &mut Option<SilentDebug<Box<FnMut(&str) -> Cow<[u8]>>>>,
+               custom_encoding: &mut Option<SilentDebug<Box<dyn FnMut(&str) -> Cow<'_, [u8]>>>>,
                name: &str, value: &str) {
     append_separator_if_needed(string, start_position);
     append_encoded(name, string, encoding, custom_encoding);
@@ -401,7 +401,7 @@ fn append_pair(string: &mut String, start_position: usize, encoding: EncodingOve
 }
 
 fn append_encoded(s: &str, string: &mut String, encoding: EncodingOverride,
-               custom_encoding: &mut Option<SilentDebug<Box<FnMut(&str) -> Cow<[u8]>>>>) {
+               custom_encoding: &mut Option<SilentDebug<Box<dyn FnMut(&str) -> Cow<'_, [u8]>>>>) {
     let bytes = if let Some(SilentDebug(ref mut custom)) = *custom_encoding {
         custom(s)
     } else {

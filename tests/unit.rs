@@ -248,7 +248,7 @@ fn test_serialization() {
 
 #[test]
 fn test_form_urlencoded() {
-    let pairs: &[(Cow<str>, Cow<str>)] = &[
+    let pairs: &[(Cow<'_, str>, Cow<'_, str>)] = &[
         ("foo".into(), "é&".into()),
         ("bar".into(), "".into()),
         ("foo".into(), "#".into())

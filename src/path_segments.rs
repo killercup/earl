@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use parser::{self, SchemeType, to_u32};
+use crate::parser::{self, SchemeType, to_u32};
 use std::str;
-use Url;
+use crate::Url;
 
 /// Exposes methods to manipulate the path of an URL that is not cannot-be-base.
 ///
@@ -42,7 +42,7 @@ pub struct PathSegmentsMut<'a> {
 }
 
 // Not re-exported outside the crate
-pub fn new(url: &mut Url) -> PathSegmentsMut {
+pub fn new(url: &mut Url) -> PathSegmentsMut<'_> {
     let after_path = url.take_after_path();
     let old_after_path_position = to_u32(url.serialization.len()).unwrap();
     debug_assert!(url.byte_at(url.path_start) == b'/');

@@ -12,7 +12,7 @@ use std::fmt::{self, Formatter};
 use std::io;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6, ToSocketAddrs};
 use std::vec;
-use parser::{ParseResult, ParseError};
+use crate::parser::{ParseResult, ParseError};
 use percent_encoding::{percent_decode, utf8_percent_encode, SIMPLE_ENCODE_SET};
 use idna;
 
@@ -157,7 +157,7 @@ impl Host<String> {
         if let Some(address) = parse_ipv4addr(&domain)? {
             Ok(Host::Ipv4(address))
         } else {
-            Ok(Host::Domain(domain.into()))
+            Ok(Host::Domain(domain))
         }
     }
 
@@ -180,7 +180,7 @@ impl Host<String> {
 }
 
 impl<S: AsRef<str>> fmt::Display for Host<S> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match *self {
             Host::Domain(ref domain) => domain.as_ref().fmt(f),
             Host::Ipv4(ref addr) => addr.fmt(f),
@@ -212,7 +212,7 @@ impl<'a> HostAndPort<&'a str> {
 }
 
 impl<S: AsRef<str>> fmt::Display for HostAndPort<S> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         self.host.fmt(f)?;
         f.write_str(":")?;
         self.port.fmt(f)
@@ -267,7 +267,7 @@ impl Iterator for SocketAddrs {
     }
 }
 
-fn write_ipv6(addr: &Ipv6Addr, f: &mut Formatter) -> fmt::Result {
+fn write_ipv6(addr: &Ipv6Addr, f: &mut Formatter<'_>) -> fmt::Result {
     let segments = addr.segments();
     let (compress_start, compress_end) = longest_zero_sequence(&segments);
     let mut i = 0;
@@ -500,14 +500,14 @@ fn parse_ipv6addr(input: &str) -> ParseResult<Ipv6Addr> {
             let mut ipv4_piece = None;
             while i < len {
                 let digit = match input[i] {
-                    c @ b'0' ... b'9' => c - b'0',
+                    c @ b'0' ..= b'9' => c - b'0',
                     _ => break
                 };
                 match ipv4_piece {
-                    None => ipv4_piece = Some(digit as u16),
+                    None => ipv4_piece = Some(u16::from(digit)),
                     Some(0) => return Err(ParseError::InvalidIpv6Address),  // No leading zero
                     Some(ref mut v) => {
-                        *v = *v * 10 + digit as u16;
+                        *v = *v * 10 + u16::from(digit);
                         if *v > 255 {
                             return Err(ParseError::InvalidIpv6Address)
                         }

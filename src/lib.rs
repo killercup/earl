@@ -111,7 +111,7 @@ assert_eq!(css_url.as_str(), "http://servo.github.io/rust-url/main.css");
 #[cfg(feature="serde")] extern crate serde;
 #[cfg(feature="heapsize")] #[macro_use] extern crate heapsize;
 
-pub extern crate idna;
+pub use idna;
 #[macro_use]
 pub extern crate percent_encoding;
 
@@ -216,7 +216,7 @@ impl<'a> ParseOptions<'a> {
     /// latter, passing the `SyntaxViolation` description. Only the last value
     /// passed to either method will be used by a parser.
     #[deprecated]
-    pub fn log_syntax_violation(mut self, new: Option<&'a Fn(&'static str)>) -> Self {
+    pub fn log_syntax_violation(mut self, new: Option<&'a dyn Fn(&'static str)>) -> Self {
         self.violation_fn = match new {
             Some(f) => ViolationFn::OldFn(f),
             None => ViolationFn::NoOp
@@ -246,7 +246,7 @@ impl<'a> ParseOptions<'a> {
     /// # }
     /// # run().unwrap();
     /// ```
-    pub fn syntax_violation_callback(mut self, new: Option<&'a Fn(SyntaxViolation)>) -> Self {
+    pub fn syntax_violation_callback(mut self, new: Option<&'a dyn Fn(SyntaxViolation)>) -> Self {
         self.violation_fn = match new {
             Some(f) => ViolationFn::NewFn(f),
             None => ViolationFn::NoOp
@@ -255,7 +255,7 @@ impl<'a> ParseOptions<'a> {
     }
 
     /// Parse an URL string with the configuration so far.
-    pub fn parse(self, input: &str) -> Result<Url, ::ParseError> {
+    pub fn parse(self, input: &str) -> Result<Url, crate::ParseError> {
         Parser {
             serialization: String::with_capacity(input.len()),
             base_url: self.base_url,
@@ -267,7 +267,7 @@ impl<'a> ParseOptions<'a> {
 }
 
 impl<'a> Debug for ParseOptions<'a> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f,
                "ParseOptions {{ base_url: {:?}, encoding_override: {:?}, \
                 violation_fn: {:?} }}",
@@ -300,7 +300,7 @@ impl Url {
     ///
     /// [`ParseError`]: enum.ParseError.html
     #[inline]
-    pub fn parse(input: &str) -> Result<Url, ::ParseError> {
+    pub fn parse(input: &str) -> Result<Url, crate::ParseError> {
         Url::options().parse(input)
     }
 
@@ -329,7 +329,7 @@ impl Url {
     ///
     /// [`ParseError`]: enum.ParseError.html
     #[inline]
-    pub fn parse_with_params<I, K, V>(input: &str, iter: I) -> Result<Url, ::ParseError>
+    pub fn parse_with_params<I, K, V>(input: &str, iter: I) -> Result<Url, crate::ParseError>
         where I: IntoIterator,
               I::Item: Borrow<(K, V)>,
               K: AsRef<str>,
@@ -376,7 +376,7 @@ impl Url {
     ///
     /// [`ParseError`]: enum.ParseError.html
     #[inline]
-    pub fn join(&self, input: &str) -> Result<Url, ::ParseError> {
+    pub fn join(&self, input: &str) -> Result<Url, crate::ParseError> {
         Url::options().base_url(Some(self)).parse(input)
     }
 
@@ -484,9 +484,9 @@ impl Url {
         }
 
         assert!(self.scheme_end >= 1);
-        assert!(matches!(self.byte_at(0), b'a'...b'z' | b'A'...b'Z'));
+        assert!(matches!(self.byte_at(0), b'a'..=b'z' | b'A'..=b'Z'));
         assert!(self.slice(1..self.scheme_end).chars()
-                .all(|c| matches!(c, 'a'...'z' | 'A'...'Z' | '0'...'9' | '+' | '-' | '.')));
+                .all(|c| matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '+' | '-' | '.')));
         assert_eq!(self.byte_at(self.scheme_end), b':');
 
         if self.slice(self.scheme_end + 1 ..).starts_with("//") {
@@ -1082,7 +1082,7 @@ impl Url {
     /// # }
     /// # run().unwrap();
     /// ```
-    pub fn path_segments(&self) -> Option<str::Split<char>> {
+    pub fn path_segments(&self) -> Option<str::Split<'_, char>> {
         let path = self.path();
         if path.starts_with('/') {
             Some(path[1..].split('/'))
@@ -1154,7 +1154,7 @@ impl Url {
     ///
 
     #[inline]
-    pub fn query_pairs(&self) -> form_urlencoded::Parse {
+    pub fn query_pairs(&self) -> form_urlencoded::Parse<'_> {
         form_urlencoded::parse(self.query().unwrap_or("").as_bytes())
     }
 
@@ -1197,7 +1197,7 @@ impl Url {
         })
     }
 
-    fn mutate<F: FnOnce(&mut Parser) -> R, R>(&mut self, f: F) -> R {
+    fn mutate<F: FnOnce(&mut Parser<'_>) -> R, R>(&mut self, f: F) -> R {
         let mut parser = Parser::for_setter(mem::replace(&mut self.serialization, String::new()));
         let result = f(&mut parser);
         self.serialization = parser.serialization;
@@ -1331,7 +1331,7 @@ impl Url {
     /// not `url.set_query(None)`.
     ///
     /// The state of `Url` is unspecified if this return value is leaked without being dropped.
-    pub fn query_pairs_mut(&mut self) -> form_urlencoded::Serializer<UrlQuery> {
+    pub fn query_pairs_mut(&mut self) -> form_urlencoded::Serializer<UrlQuery<'_>> {
         let fragment = self.take_fragment();
 
         let query_start;
@@ -1344,7 +1344,7 @@ impl Url {
             self.serialization.push('?');
         }
 
-        let query = UrlQuery { url: Some(self), fragment: fragment };
+        let query = UrlQuery { url: Some(self), fragment };
         form_urlencoded::Serializer::for_suffix(query, query_start + "?".len())
     }
 
@@ -1405,7 +1405,7 @@ impl Url {
     /// Return an object with methods to manipulate this URL’s path segments.
     ///
     /// Return `Err(())` if this URL is cannot-be-a-base.
-    pub fn path_segments_mut(&mut self) -> Result<PathSegmentsMut, ()> {
+    pub fn path_segments_mut(&mut self) -> Result<PathSegmentsMut<'_>, ()> {
         if self.cannot_be_a_base() {
             Err(())
         } else {
@@ -1981,12 +1981,12 @@ impl Url {
         let host_start = serialization.len() as u32;
         let (host_end, host) = path_to_file_url_segments(path.as_ref(), &mut serialization)?;
         Ok(Url {
-            serialization: serialization,
+            serialization,
             scheme_end: "file".len() as u32,
             username_end: host_start,
-            host_start: host_start,
-            host_end: host_end,
-            host: host,
+            host_start,
+            host_end,
+            host,
             port: None,
             path_start: host_end,
             query_start: None,
@@ -2136,7 +2136,7 @@ impl str::FromStr for Url {
     type Err = ParseError;
 
     #[inline]
-    fn from_str(input: &str) -> Result<Url, ::ParseError> {
+    fn from_str(input: &str) -> Result<Url, crate::ParseError> {
         Url::parse(input)
     }
 }
@@ -2144,7 +2144,7 @@ impl str::FromStr for Url {
 /// Display the serialization of this URL.
 impl fmt::Display for Url {
     #[inline]
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.serialization, formatter)
     }
 }
@@ -2152,7 +2152,7 @@ impl fmt::Display for Url {
 /// Debug the serialization of this URL.
 impl fmt::Debug for Url {
     #[inline]
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.serialization, formatter)
     }
 }
@@ -2325,10 +2325,9 @@ fn path_to_file_url_segments_windows(path: &Path, serialization: &mut String)
 
 
 #[cfg(any(unix, target_os = "redox"))]
-fn file_url_segments_to_pathbuf(host: Option<&str>, segments: str::Split<char>) -> Result<PathBuf, ()> {
+fn file_url_segments_to_pathbuf(host: Option<&str>, segments: str::Split<'_, char>) -> Result<PathBuf, ()> {
     use std::ffi::OsStr;
     use std::os::unix::prelude::OsStrExt;
-    use std::path::PathBuf;
 
     if host.is_some() {
         return Err(());
@@ -2357,7 +2356,7 @@ fn file_url_segments_to_pathbuf(host: Option<&str>, segments: str::Split<char>) 
 
 // Build this unconditionally to alleviate https://github.com/servo/rust-url/issues/102
 #[cfg_attr(not(windows), allow(dead_code))]
-fn file_url_segments_to_pathbuf_windows(host: Option<&str>, mut segments: str::Split<char>) -> Result<PathBuf, ()> {
+fn file_url_segments_to_pathbuf_windows(host: Option<&str>, mut segments: str::Split<'_, char>) -> Result<PathBuf, ()> {
 
     let mut string = if let Some(host) = host {
         r"\\".to_owned() + host

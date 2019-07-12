@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use std::ops::{Range, RangeFrom, RangeTo, RangeFull, Index};
-use Url;
+use crate::Url;
 
 impl Index<RangeFull> for Url {
     type Output = str;

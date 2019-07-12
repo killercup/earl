@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate bencher;
 
-extern crate earl;
+
 
 use bencher::{black_box, Bencher};
 

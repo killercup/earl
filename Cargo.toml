@@ -2,6 +2,7 @@
 name = "earl"
 version = "0.1.0"
 authors = ["The rust-url developers", "People who like earl grey"]
+edition = "2018"
 
 description = "URL library for Rust, based on the WHATWG URL Standard"
 documentation = "https://docs.rs/earl"

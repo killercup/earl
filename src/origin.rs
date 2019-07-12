@@ -7,11 +7,11 @@
 // except according to those terms.
 
 #[cfg(feature = "heapsize")] use heapsize::HeapSizeOf;
-use host::Host;
+use crate::host::Host;
 use idna::domain_to_unicode;
-use parser::default_port;
-use std::sync::atomic::{AtomicUsize, ATOMIC_USIZE_INIT, Ordering};
-use Url;
+use crate::parser::default_port;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use crate::Url;
 
 pub fn url_origin(url: &Url) -> Origin {
     let scheme = url.scheme();
@@ -76,7 +76,7 @@ impl HeapSizeOf for Origin {
 impl Origin {
     /// Creates a new opaque origin that is only equal to itself.
     pub fn new_opaque() -> Origin {
-        static COUNTER: AtomicUsize = ATOMIC_USIZE_INIT;
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
         Origin::Opaque(OpaqueOrigin(COUNTER.fetch_add(1, Ordering::SeqCst)))
     }
 

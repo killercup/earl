@@ -121,7 +121,7 @@ impl EncodingOverride {
     }
 }
 
-pub fn decode_utf8_lossy(input: Cow<[u8]>) -> Cow<str> {
+pub fn decode_utf8_lossy(input: Cow<'_, [u8]>) -> Cow<'_, str> {
     match input {
         Cow::Borrowed(bytes) => String::from_utf8_lossy(bytes),
         Cow::Owned(bytes) => {
@@ -138,7 +138,7 @@ pub fn decode_utf8_lossy(input: Cow<[u8]>) -> Cow<str> {
     }
 }
 
-pub fn encode_utf8(input: Cow<str>) -> Cow<[u8]> {
+pub fn encode_utf8(input: Cow<'_, str>) -> Cow<'_, [u8]> {
     match input {
         Cow::Borrowed(s) => Cow::Borrowed(s.as_bytes()),
         Cow::Owned(s) => Cow::Owned(s.into_bytes())

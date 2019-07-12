@@ -13,9 +13,9 @@ use std::error::Error;
 use std::fmt::{self, Formatter, Write};
 use std::str;
 
-use Url;
-use encoding::EncodingOverride;
-use host::{Host, HostInternal};
+use crate::Url;
+use crate::encoding::EncodingOverride;
+use crate::host::{Host, HostInternal};
 use percent_encoding::{
     utf8_percent_encode, percent_encode,
     SIMPLE_ENCODE_SET, DEFAULT_ENCODE_SET, USERINFO_ENCODE_SET, QUERY_ENCODE_SET,
@@ -69,7 +69,7 @@ simple_enum_error! {
 known_heap_size!(0, ParseError);
 
 impl fmt::Display for ParseError {
-    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         self.description().fmt(fmt)
     }
 }
@@ -121,7 +121,7 @@ syntax_violation_enum! {
 known_heap_size!(0, SyntaxViolation);
 
 impl fmt::Display for SyntaxViolation {
-    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         self.description().fmt(fmt)
     }
 }
@@ -171,7 +171,7 @@ impl<'i> Input<'i> {
         Input::with_log(input, ViolationFn::NoOp)
     }
 
-    pub fn with_log(original_input: &'i str, vfn: ViolationFn) -> Self {
+    pub fn with_log(original_input: &'i str, vfn: ViolationFn<'_>) -> Self {
         let input = original_input.trim_matches(c0_control_or_space);
         if vfn.is_set() {
             if input.len() < original_input.len() {
@@ -274,8 +274,8 @@ impl<'i> Iterator for Input<'i> {
 /// Wrapper for syntax violation callback functions.
 #[derive(Copy, Clone)]
 pub enum ViolationFn<'a> {
-    NewFn(&'a (Fn(SyntaxViolation) + 'a)),
-    OldFn(&'a (Fn(&'static str) + 'a)),
+    NewFn(&'a (dyn Fn(SyntaxViolation) + 'a)),
+    OldFn(&'a (dyn Fn(&'static str) + 'a)),
     NoOp
 }
 
@@ -311,7 +311,7 @@ impl<'a> ViolationFn<'a> {
 }
 
 impl<'a> fmt::Debug for ViolationFn<'a> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match *self {
             ViolationFn::NewFn(_) => write!(f, "NewFn(Fn(SyntaxViolation))"),
             ViolationFn::OldFn(_) => write!(f, "OldFn(Fn(&'static str))"),
@@ -379,7 +379,7 @@ impl<'a> Parser<'a> {
         debug_assert!(self.serialization.is_empty());
         while let Some(c) = input.next() {
             match c {
-                'a'...'z' | 'A'...'Z' | '0'...'9' | '+' | '-' | '.' => {
+                'a'..='z' | 'A'..='Z' | '0'..='9' | '+' | '-' | '.' => {
                     self.serialization.push(c.to_ascii_lowercase())
                 }
                 ':' => return Ok(input),
@@ -398,7 +398,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_with_scheme(mut self, input: Input) -> ParseResult<Url> {
+    fn parse_with_scheme(mut self, input: Input<'_>) -> ParseResult<Url> {
         use SyntaxViolation::{ExpectedFileDoubleSlash, ExpectedDoubleSlash};
         let scheme_end = to_u32(self.serialization.len())?;
         let scheme_type = SchemeType::from(&self.serialization);
@@ -436,7 +436,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Scheme other than file, http, https, ws, ws, ftp, gopher.
-    fn parse_non_special(mut self, input: Input, scheme_type: SchemeType, scheme_end: u32)
+    fn parse_non_special(mut self, input: Input<'_>, scheme_type: SchemeType, scheme_end: u32)
                          -> ParseResult<Url> {
         // path or authority state (
         if let Some(input) = input.split_prefix("//") {
@@ -460,7 +460,7 @@ impl<'a> Parser<'a> {
                                      host_end, host, port, path_start, remaining)
     }
 
-    fn parse_file(mut self, input: Input, mut base_file_url: Option<&Url>) -> ParseResult<Url> {
+    fn parse_file(mut self, input: Input<'_>, mut base_file_url: Option<&Url>) -> ParseResult<Url> {
         use SyntaxViolation::Backslash;
         // file state
         debug_assert!(self.serialization.is_empty());
@@ -674,7 +674,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_relative(mut self, input: Input, scheme_type: SchemeType, base_url: &Url)
+    fn parse_relative(mut self, input: Input<'_>, scheme_type: SchemeType, base_url: &Url)
                       -> ParseResult<Url> {
         // relative state
         debug_assert!(self.serialization.is_empty());
@@ -750,7 +750,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn after_double_slash(mut self, input: Input, scheme_type: SchemeType, scheme_end: u32)
+    fn after_double_slash(mut self, input: Input<'_>, scheme_type: SchemeType, scheme_end: u32)
                           -> ParseResult<Url> {
         self.serialization.push('/');
         self.serialization.push('/');
@@ -846,8 +846,8 @@ impl<'a> Parser<'a> {
         Ok((host_end, host.into(), port, remaining))
     }
 
-    pub fn parse_host(mut input: Input, scheme_type: SchemeType)
-                             -> ParseResult<(Host<String>, Input)> {
+    pub fn parse_host(mut input: Input<'_>, scheme_type: SchemeType)
+                             -> ParseResult<(Host<String>, Input<'_>)> {
         // Undo the Input abstraction here to avoid allocating in the common case
         // where the host part of the input does not contain any tab or newline
         let input_str = input.chars.as_str();
@@ -944,9 +944,9 @@ impl<'a> Parser<'a> {
         Ok((true, host, remaining))
     }
 
-    pub fn parse_port<P>(mut input: Input, default_port: P,
+    pub fn parse_port<P>(mut input: Input<'_>, default_port: P,
                                 context: Context)
-                                -> ParseResult<(Option<u16>, Input)>
+                                -> ParseResult<(Option<u16>, Input<'_>)>
                                 where P: Fn() -> Option<u16> {
         let mut port: u32 = 0;
         let mut has_any_digit = false;
@@ -1105,7 +1105,7 @@ impl<'a> Parser<'a> {
 
     fn with_query_and_fragment(mut self, scheme_end: u32, username_end: u32,
                                host_start: u32, host_end: u32, host: HostInternal,
-                               port: Option<u16>, path_start: u32, remaining: Input)
+                               port: Option<u16>, path_start: u32, remaining: Input<'_>)
                                -> ParseResult<Url> {
         let (query_start, fragment_start) =
             self.parse_query_and_fragment(scheme_end, remaining)?;
@@ -1124,7 +1124,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Return (query_start, fragment_start)
-    fn parse_query_and_fragment(&mut self, scheme_end: u32, mut input: Input)
+    fn parse_query_and_fragment(&mut self, scheme_end: u32, mut input: Input<'_>)
                                 -> ParseResult<(Option<u32>, Option<u32>)> {
         let mut query_start = None;
         match input.next() {
@@ -1172,7 +1172,7 @@ impl<'a> Parser<'a> {
         remaining
     }
 
-    fn fragment_only(mut self, base_url: &Url, mut input: Input) -> ParseResult<Url> {
+    fn fragment_only(mut self, base_url: &Url, mut input: Input<'_>) -> ParseResult<Url> {
         let before_fragment = match base_url.fragment_start {
             Some(i) => base_url.slice(..i),
             None => &*base_url.serialization,
@@ -1191,7 +1191,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    pub fn parse_fragment(&mut self, mut input: Input) {
+    pub fn parse_fragment(&mut self, mut input: Input<'_>) {
         while let Some((c, utf8_c)) = input.next_utf8() {
             if c ==  '\0' {
                 self.violation_fn.call(SyntaxViolation::NullInFragment)
@@ -1203,7 +1203,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn check_url_code_point(&self, c: char, input: &Input) {
+    fn check_url_code_point(&self, c: char, input: &Input<'_>) {
         let vfn = self.violation_fn;
         if vfn.is_set() {
             if c == '%' {
@@ -1221,7 +1221,7 @@ impl<'a> Parser<'a> {
 
 #[inline]
 fn is_ascii_hex_digit(c: char) -> bool {
-    matches!(c, 'a'...'f' | 'A'...'F' | '0'...'9')
+    matches!(c, 'a'..='f' | 'A'..='F' | '0'..='9')
 }
 
 // Non URL code points:
@@ -1234,20 +1234,20 @@ fn is_ascii_hex_digit(c: char) -> bool {
 #[inline]
 fn is_url_code_point(c: char) -> bool {
     matches!(c,
-        'a'...'z' |
-        'A'...'Z' |
-        '0'...'9' |
+        'a'..='z' |
+        'A'..='Z' |
+        '0'..='9' |
         '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | '-' |
         '.' | '/' | ':' | ';' | '=' | '?' | '@' | '_' | '~' |
-        '\u{A0}'...'\u{D7FF}' | '\u{E000}'...'\u{FDCF}' | '\u{FDF0}'...'\u{FFFD}' |
-        '\u{10000}'...'\u{1FFFD}' | '\u{20000}'...'\u{2FFFD}' |
-        '\u{30000}'...'\u{3FFFD}' | '\u{40000}'...'\u{4FFFD}' |
-        '\u{50000}'...'\u{5FFFD}' | '\u{60000}'...'\u{6FFFD}' |
-        '\u{70000}'...'\u{7FFFD}' | '\u{80000}'...'\u{8FFFD}' |
-        '\u{90000}'...'\u{9FFFD}' | '\u{A0000}'...'\u{AFFFD}' |
-        '\u{B0000}'...'\u{BFFFD}' | '\u{C0000}'...'\u{CFFFD}' |
-        '\u{D0000}'...'\u{DFFFD}' | '\u{E1000}'...'\u{EFFFD}' |
-        '\u{F0000}'...'\u{FFFFD}' | '\u{100000}'...'\u{10FFFD}')
+        '\u{A0}'..='\u{D7FF}' | '\u{E000}'..='\u{FDCF}' | '\u{FDF0}'..='\u{FFFD}' |
+        '\u{10000}'..='\u{1FFFD}' | '\u{20000}'..='\u{2FFFD}' |
+        '\u{30000}'..='\u{3FFFD}' | '\u{40000}'..='\u{4FFFD}' |
+        '\u{50000}'..='\u{5FFFD}' | '\u{60000}'..='\u{6FFFD}' |
+        '\u{70000}'..='\u{7FFFD}' | '\u{80000}'..='\u{8FFFD}' |
+        '\u{90000}'..='\u{9FFFD}' | '\u{A0000}'..='\u{AFFFD}' |
+        '\u{B0000}'..='\u{BFFFD}' | '\u{C0000}'..='\u{CFFFD}' |
+        '\u{D0000}'..='\u{DFFFD}' | '\u{E1000}'..='\u{EFFFD}' |
+        '\u{F0000}'..='\u{FFFFD}' | '\u{100000}'..='\u{10FFFD}')
 }
 
 /// https://url.spec.whatwg.org/#c0-controls-and-space
@@ -1259,7 +1259,7 @@ fn c0_control_or_space(ch: char) -> bool {
 /// https://url.spec.whatwg.org/#ascii-alpha
 #[inline]
 pub fn ascii_alpha(ch: char) -> bool {
-    matches!(ch, 'a'...'z' | 'A'...'Z')
+    matches!(ch, 'a'..='z' | 'A'..='Z')
 }
 
 #[inline]
@@ -1283,7 +1283,7 @@ fn starts_with_windows_drive_letter(s: &str) -> bool {
     && matches!(s.as_bytes()[1], b':' | b'|')
 }
 
-fn starts_with_windows_drive_letter_segment(input: &Input) -> bool {
+fn starts_with_windows_drive_letter_segment(input: &Input<'_>) -> bool {
     let mut input = input.clone();
     matches!((input.next(), input.next(), input.next()), (Some(a), Some(b), Some(c))
              if ascii_alpha(a) && matches!(b, ':' | '|') && matches!(c, '/' | '\\' | '?' | '#'))
