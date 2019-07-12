@@ -1,20 +1,39 @@
-language: rust
 
-jobs:
+language: rust
+cache: cargo
+
+matrix:
   include:
   - rust: 1.35.0
-    script: cargo test --all-features
+    env: NAME=test
+    before_script:
+    - rustup component add rustfmt
+    script:
+    - cargo test --all --verbose
+  - rust: 1.35.0
+    env: NAME=pretty
+    before_script:
+    - rustup component add rustfmt
+    script:
+    - cargo fmt -- --check
+  - rust: 1.35.0
+    env: NAME=petty
+    before_script:
+    - rustup component add clippy
+    script:
+    - cargo clippy --all --verbose
+  - rust: nightly-2019-07-09
+    env: NAME=fuzz LSAN_OPTIONS=verbosity=1:log_threads=1 CARGO_FUZZ_VERSION=0.5.2
+    before_script: |
+      test "$(cargo fuzz --version 2> /dev/null)" = "cargo-fuzz $CARGO_FUZZ_VERSION" \
+          && echo "cargo-fuzz already installed" \
+          || cargo install cargo-fuzz --vers $CARGO_FUZZ_VERSION --force
+    script:
+      - mkdir -pv fuzz/artifacts/parse/
+      - mkdir -pv fuzz/corpus/parse
+      - cargo fuzz run parse --release -- -max_total_time=60 tests/fixtures/ fuzz/corpus/ || echo "DAMN"
+    
 
-  - rust: stable
-    script: cargo test --all-features --all
-
-  - rust: beta
-    script: cargo test --all-features --all
-
-  - rust: nightly
-    script: cargo test --all-features --all
-
-  - rust: nightly
-    env: TARGET=WASM32
-    install: rustup target add wasm32-unknown-unknown
-    script: cargo build --all --target=wasm32-unknown-unknown
+notifications:
+  email:
+    on_success: never
