@@ -1,10 +1,23 @@
-rust-url
-========
+# Earl
 
-[![Travis build Status](https://travis-ci.org/servo/rust-url.svg?branch=master)](https://travis-ci.org/servo/rust-url) [![Appveyor build status](https://ci.appveyor.com/api/projects/status/ulkqx2xcemyod6xa?svg=true)](https://ci.appveyor.com/project/Manishearth/rust-url)
+A fork of [rust-url](https://github.com/servo/rust-url)
+adding support for Serde 1.0 and simplifying the code base a bit.
 
-URL library for Rust, based on the [URL Standard](https://url.spec.whatwg.org/).
+## License
 
-[Documentation](https://docs.rs/url/)
+Most of the code is originally authored and thus copyright by the
+[rust-url](https://github.com/servo/rust-url) team.
 
-Please see [UPGRADING.md](https://github.com/servo/rust-url/blob/master/UPGRADING.md) if you are upgrading from 0.x to 1.x.
+Licensed under either of
+
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you, as defined in the Apache-2.0
+license, shall be dual licensed as above, without any additional terms or
+conditions.
