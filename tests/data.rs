@@ -8,11 +8,9 @@
 
 //! Data-driven tests
 
-extern crate rustc_serialize;
 extern crate rustc_test as test;
 extern crate url;
 
-use rustc_serialize::json::{self, Json};
 use url::{Url, quirks};
 
 fn check_invariants(url: &Url) {
