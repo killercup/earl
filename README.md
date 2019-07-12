@@ -3,6 +3,10 @@
 A fork of [rust-url](https://github.com/servo/rust-url)
 adding support for Serde 1.0 and simplifying the code base a bit.
 
+**This is meant as a temporary thing that will be replaced by url 2.0
+eventually!** Honestly, I just wanted to change stuff without many consequences.
+Also, the name is cool.
+
 ## License
 
 Most of the code is originally authored and thus copyright by the
