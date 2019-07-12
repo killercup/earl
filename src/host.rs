@@ -28,7 +28,7 @@ pub enum HostInternal {
 }
 
 #[cfg(feature = "heapsize")]
-known_heap_size!(0, HostInternal);
+heapsize::known_heap_size!(0, HostInternal);
 
 impl<S> From<Host<S>> for HostInternal {
     fn from(host: Host<S>) -> HostInternal {

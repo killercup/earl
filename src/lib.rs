@@ -470,7 +470,11 @@ impl Url {
         macro_rules! assert {
             ($x: expr) => {
                 if !$x {
-                    return Err(format!("!( {} ) for URL {:?}", stringify!($x), self.serialization));
+                    return Err(format!(
+                        "!( {} ) for URL {:?}",
+                        stringify!($x),
+                        self.serialization
+                    ));
                 }
             };
         }
