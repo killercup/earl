@@ -2,7 +2,7 @@ language: rust
 
 jobs:
   include:
-  - rust: 1.17.0
+  - rust: 1.35.0
     script: cargo test --all-features
 
   - rust: stable
