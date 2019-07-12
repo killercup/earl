@@ -14,7 +14,6 @@ license = "MIT/Apache-2.0"
 
 [badges]
 travis-ci = { repository = "killercup/earl" }
-appveyor = { repository = "killercup/earl" }
 
 [dev-dependencies]
 rustc-test = "0.3"
@@ -27,8 +26,8 @@ query_encoding = ["encoding"]
 heap_size = ["heapsize"]
 
 [dependencies]
-encoding = {version = "0.2", optional = true}
-heapsize = {version = ">=0.4.1, <0.5", optional = true}
+encoding = { version = "0.2", optional = true }
+heapsize = { version = "0.4.2", optional = true }
 idna = { version = "0.1.0" }
 matches = "0.1"
 percent-encoding = { version = "1.0.0" }
