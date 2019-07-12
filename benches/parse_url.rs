@@ -1,8 +1,6 @@
 #[macro_use]
 extern crate bencher;
 
-
-
 use bencher::{black_box, Bencher};
 
 use earl::Url;

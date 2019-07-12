@@ -6,9 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use crate::parser::{self, SchemeType, to_u32};
+use crate::{
+    parser::{self, to_u32, SchemeType},
+    Url,
+};
 use std::str;
-use crate::Url;
 
 /// Exposes methods to manipulate the path of an URL that is not cannot-be-base.
 ///
@@ -194,7 +196,10 @@ impl<'a> PathSegmentsMut<'a> {
     /// # run().unwrap();
     /// ```
     pub fn extend<I>(&mut self, segments: I) -> &mut Self
-    where I: IntoIterator, I::Item: AsRef<str> {
+    where
+        I: IntoIterator,
+        I::Item: AsRef<str>,
+    {
         let scheme_type = SchemeType::from(self.url.scheme());
         let path_start = self.url.path_start as usize;
         self.url.mutate(|parser| {
@@ -202,14 +207,18 @@ impl<'a> PathSegmentsMut<'a> {
             for segment in segments {
                 let segment = segment.as_ref();
                 if matches!(segment, "." | "..") {
-                    continue
+                    continue;
                 }
                 if parser.serialization.len() > path_start + 1 {
                     parser.serialization.push('/');
                 }
-                let mut has_host = true;  // FIXME account for this?
-                parser.parse_path(scheme_type, &mut has_host, path_start,
-                                  parser::Input::new(segment));
+                let mut has_host = true; // FIXME account for this?
+                parser.parse_path(
+                    scheme_type,
+                    &mut has_host,
+                    path_start,
+                    parser::Input::new(segment),
+                );
             }
         });
         self

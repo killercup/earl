@@ -6,12 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[cfg(feature = "heapsize")] use heapsize::HeapSizeOf;
-use crate::host::Host;
+use crate::{host::Host, parser::default_port, Url};
+#[cfg(feature = "heapsize")]
+use heapsize::HeapSizeOf;
 use idna::domain_to_unicode;
-use crate::parser::default_port;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use crate::Url;
 
 pub fn url_origin(url: &Url) -> Origin {
     let scheme = url.scheme();
@@ -20,16 +19,17 @@ pub fn url_origin(url: &Url) -> Origin {
             let result = Url::parse(url.path());
             match result {
                 Ok(ref url) => url_origin(url),
-                Err(_)  => Origin::new_opaque()
+                Err(_) => Origin::new_opaque(),
             }
-        },
-        "ftp" | "gopher" | "http" | "https" | "ws" | "wss" => {
-            Origin::Tuple(scheme.to_owned(), url.host().unwrap().to_owned(),
-                url.port_or_known_default().unwrap())
-        },
+        }
+        "ftp" | "gopher" | "http" | "https" | "ws" | "wss" => Origin::Tuple(
+            scheme.to_owned(),
+            url.host().unwrap().to_owned(),
+            url.port_or_known_default().unwrap(),
+        ),
         // TODO: Figure out what to do if the scheme is a file
         "file" => Origin::new_opaque(),
-        _ => Origin::new_opaque()
+        _ => Origin::new_opaque(),
     }
 }
 
@@ -56,7 +56,7 @@ pub enum Origin {
     Opaque(OpaqueOrigin),
 
     /// Consists of the URL's scheme, host and port
-    Tuple(String, Host<String>, u16)
+    Tuple(String, Host<String>, u16),
 }
 
 #[cfg(feature = "heapsize")]
@@ -64,14 +64,12 @@ impl HeapSizeOf for Origin {
     fn heap_size_of_children(&self) -> usize {
         match *self {
             Origin::Tuple(ref scheme, ref host, _) => {
-                scheme.heap_size_of_children() +
-                host.heap_size_of_children()
-            },
+                scheme.heap_size_of_children() + host.heap_size_of_children()
+            }
             _ => 0,
         }
     }
 }
-
 
 impl Origin {
     /// Creates a new opaque origin that is only equal to itself.
@@ -110,7 +108,7 @@ impl Origin {
                         let (domain, _errors) = domain_to_unicode(domain);
                         Host::Domain(domain)
                     }
-                    _ => host.clone()
+                    _ => host.clone(),
                 };
                 if default_port(scheme) == Some(port) {
                     format!("{}://{}", scheme, host)

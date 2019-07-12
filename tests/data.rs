@@ -24,7 +24,6 @@
 //     }
 // }
 
-
 // fn run_parsing(input: &str, base: &str, expected: Result<ExpectedAttributes, ()>) {
 //     let base = match Url::parse(&base) {
 //         Ok(base) => base,
